@@ -40,7 +40,7 @@ import javax.crypto.spec.SecretKeySpec;
 //
 // see README for use examples
 // 
-// version: 1.1, date: 09.07.2016, author: Erik Fritzsche
+// version: 1.1, date: 10.07.2016, author: Erik Fritzsche
 // TODO add validation in form of signature or hash or something like this
 public class Cryptout{
 	
