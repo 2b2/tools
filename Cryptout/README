@@ -9,6 +9,14 @@ Note: If you want to use AES-256 with oracle-java you have to download
       and install "Java Cryptography Extension (JCE) Unlimited Strength
       Jurisdiction Policy Files" for your java version.
 
+Note: For now only not password protected RSA private keys in DER format
+      are supported.
+
+
+Examples: echo "test" | java -jar cryptout.jar --encrypt --aes256 ~/public-key.der > test.enc
+          cat test.enc | java -jar cryptout.jar --decrypt ~/private-key.der > test.txt
+
+
 Encryption is done by firstly generating a random AES-128/AES-256 key and
 then writing this session key encrypted with a given RSA public key using
 a "RSA/ECB/PKCS1Padding" cipher (which should be equivalent to
