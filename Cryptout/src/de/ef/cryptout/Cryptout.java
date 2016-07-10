@@ -38,7 +38,7 @@ import javax.crypto.spec.SecretKeySpec;
 // in both modes everything (except the parameters like the RSA key
 // location of course) is written to System.out and read from System.in
 //
-// see the scripts folder for use examples for windows and linux
+// see README for an use example
 // 
 // version: 1.1, date: 09.07.2016, author: Erik Fritzsche
 // TODO add validation in form of signature or hash or something like this
