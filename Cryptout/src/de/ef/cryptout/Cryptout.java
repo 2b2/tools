@@ -44,7 +44,7 @@ import javax.crypto.spec.SecretKeySpec;
 // TODO add validation in form of signature or hash or something like this
 public class Cryptout{
 	
-	private final static String VERSION = "Version 1.1 Build 20160710001";
+	private final static String VERSION = "Version 1.1 Build 20160710002";
 	private final static int DEFAULT_BUFFER_SIZE = 8_388_608, // 8 MB
 							 BLOCK_SIZE = 16; // byte
 	
