@@ -1,0 +1,29 @@
+With this handy program you can encrypt/decrypt the output of another
+program by piping its output into the input of cryptout.
+
+Note: You have to use the same release of the program for encrypting and
+      decrypting (so don't encrypt with version 1.0 and try to decrypt
+      with version 1.1).
+
+Note: If you want to use AES-256 with oracle-java you have to download
+      and install "Java Cryptography Extension (JCE) Unlimited Strength
+      Jurisdiction Policy Files" for your java version.
+
+Encryption is done by firstly generating a random AES-128/AES-256 key and
+then writing this session key encrypted with a given RSA public key using
+a "RSA/ECB/PKCS1Padding" cipher (which should be equivalent to
+"RSA/None/PKCS1Padding" because no block cipher is used) at the beginning
+of the system output stream. Also the random initial vector (IV) for the
+"AES/CBC/PKCS5Padding" cipher is written to start of the system output
+stream. Then the system input stream is encrypted and written to the
+system output stream.
+
+Decryption is done by firstly extracting the AES session key and IV form
+the beginning of the system input stream and decrypting the session key
+using the given RSA private key. Then the system input stream is decrypted
+and written to the system output stream.
+
+
+
+I AM NO SECURITY EXPERT SO I DON'T CLAIM THAT THIS PROGRAM IS REALLY
+SECURE, USE IT TO YOUR OWN RISK.
