@@ -83,7 +83,7 @@ tar -c -g "$backup_log" -f - "$dir" | lbzip2 | java -jar cryptout.jar --encrypt 
 
 echo Finished backup of "$dir"
 
-if [ "§full_backup" = false ]
+if [ "$full_backup" = false ]
 then
 	rm "$backup_log"
 fi
