@@ -1,0 +1,89 @@
+#!/bin/bash
+
+dir="${*: -2:1}"
+backup_dir="${*: -1:1}"
+
+
+full_backup=false
+encrypt_backup=false
+backup_public_key=""
+
+while [ $# -gt 3 ]
+do
+        case "$1" in
+        --full) full_backup=true
+                ;;
+#	--encrypt) encrypt_backup=true
+#		# TODO important
+#		case "$2" in
+#		--*) echo "Missing argument for"
+#		;;
+        --*) echo "Unknown option: $1"
+                ;;
+#       *) echo "Argument: $1"
+#               ;;
+        esac
+        shift
+done
+
+
+backup_name="$(date +'%Y-%m-%d-%H-%M')"
+backup_extension=$([ "$full_backup" = true ] && echo ".full.backup" || echo ".backup")
+
+if [[ "$backup_dir" != *"/" ]]
+then
+	backup_dir="$backup_dir/"
+fi
+
+backup_path="$backup_dir$backup_name"
+
+if [[ -f "$backup_path$backup_extension" ]] || [[ -f "$backup_path-0$backup_extension" ]]
+then
+	index="1"
+	backup_new_path="$backup_path-$index"
+	while [[ -f "$backup_new_path$backup_extension" ]]
+	do
+		index=$[$index+1]
+		backup_new_path="$backup_path-$index"
+	done
+#	if [[ -f "$backup_path$backup_extension" ]]
+#	then
+#		mv "$backup_path$backup_extension" "$backup_path-0$backup_extension"
+#	fi
+	backup_path="$backup_new_path"
+fi
+
+backup_path="$backup_path$backup_extension"
+
+
+mkdir -p "$backup_dir"
+touch "$backup_path"
+
+
+backup_log="${backup_dir}backup.log"
+if [ "$full_backup" = true ]
+then
+	if [[ -f "$backup_log" ]]
+	then
+		rm "$backup_log"
+	fi
+else
+	if [[ -f "$backup_log" ]]
+	then
+		cp "$backup_log" "$backup_log.tmp"
+	fi
+	backup_log="$backup_log.tmp"
+fi
+
+
+echo Starting backup of "$dir" to "$backup_path" ...
+
+# make encryption controllable by argument
+tar -c -g "$backup_log" -f - "$dir" | lbzip2 | java -jar cryptout.jar --encrypt --aes256 "$backup_public_key" > "$backup_path"
+
+echo Finished backup of "$dir"
+
+if [ "§full_backup" = false ]
+then
+	rm "$backup_log"
+fi
