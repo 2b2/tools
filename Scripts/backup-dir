@@ -1,25 +1,37 @@
 #!/bin/bash
 
+readonly BACKUP_COMPRESSOR="lbzip2"
+readonly BACKUP_ENCRYPTOR="java -jar cryptout.jar --encrypt --aes256"
+
+
 dir="${*: -2:1}"
 backup_dir="${*: -1:1}"
 
 
 full_backup=false
+compress_backup=false
 encrypt_backup=false
 backup_public_key=""
 
-while [ $# -gt 3 ]
+while [ $# -gt 2 ]
 do
         case "$1" in
         --full) full_backup=true
                 ;;
-#	--encrypt) encrypt_backup=true
-#		# TODO important
-#		case "$2" in
-#		--*) echo "Missing argument for"
-#		;;
-        --*) echo "Unknown option: $1"
-                ;;
+		--compress) compress_backup=true
+				;;
+		--encrypt) encrypt_backup=true
+				case "$2" in
+				--*) echo "Missing argument for option: $1"
+						exit 1 # replace with proper exit code
+						;;
+				*) backup_public_key="$2"
+						shift
+						;;
+				esac
+				;;
+		--*) echo "Unknown option: $1"
+				;;
 #       *) echo "Argument: $1"
 #               ;;
         esac
@@ -78,8 +90,11 @@ fi
 
 echo Starting backup of "$dir" to "$backup_path" ...
 
-# make encryption controllable by argument
-tar -c -g "$backup_log" -f - "$dir" | lbzip2 | java -jar cryptout.jar --encrypt --aes256 "$backup_public_key" > "$backup_path"
+# test if this works
+tar -c -g "$backup_log" -f - "$dir" \
+$([ "$compress_backup" = true ] && echo "| $BACKUP_COMPRESSOR" || echo "") \
+$([ "$encrypt_backup" = true ] && echo "| $BACKUP_ENCRYPTOR $backup_public_key" || echo "") \
+> "$backup_path"
 
 echo Finished backup of "$dir"
 
