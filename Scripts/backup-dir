@@ -18,20 +18,20 @@ do
 	case "$1" in
 	--full) full_backup=true
 		;;
-		--compress) compress_backup=true
-				;;
-		--encrypt) encrypt_backup=true
-				case "$2" in
-				--*) echo "Missing argument for option: $1"
-						exit 1 # replace with proper exit code
-						;;
-				*) backup_public_key="$2"
-						shift
-						;;
-				esac
-				;;
-		--*) echo "Unknown option: $1"
-				;;
+	--compress) compress_backup=true
+		;;
+	--encrypt) encrypt_backup=true
+		if [ $# -eq 3 ] || [[ "$2" = "--"* ]]
+		then
+			echo "Missing argument for option: $1"
+			exit 1 # replace with proper exit code
+		else
+			 backup_public_key="$2"
+			shift
+		fi
+		;;
+	--*) echo "Unknown option: $1"
+		;;
 #	*) echo "Argument: $1"
 #		;;
 	esac
