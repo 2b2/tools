@@ -15,9 +15,9 @@ backup_public_key=""
 
 while [ $# -gt 2 ]
 do
-        case "$1" in
-        --full) full_backup=true
-                ;;
+	case "$1" in
+	--full) full_backup=true
+		;;
 		--compress) compress_backup=true
 				;;
 		--encrypt) encrypt_backup=true
@@ -32,10 +32,10 @@ do
 				;;
 		--*) echo "Unknown option: $1"
 				;;
-#       *) echo "Argument: $1"
-#               ;;
-        esac
-        shift
+#	*) echo "Argument: $1"
+#		;;
+	esac
+	shift
 done
 
 
