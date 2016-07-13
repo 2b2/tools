@@ -1,8 +1,7 @@
 #!/bin/bash
-
-
-# Copyright 2016 Erik Fritzsche
 #
+#
+# Copyright 2016 Erik Fritzsche
 #
 # Backup your directories by firstly packing them followed by an
 # optional compression and/or by a strong AES128/AES256 encryption.
