@@ -23,14 +23,14 @@ do
 	--encrypt) encrypt_backup=true
 		if [ $# -eq 3 ] || [[ "$2" = "--"* ]]
 		then
-			echo "Missing argument for option: $1"
-			exit 1 # replace with proper exit code
+			echo 1>&2 "Missing argument for option: $1"
+			exit 2
 		else
 			 backup_public_key="$2"
 			shift
 		fi
 		;;
-	--*) echo "Unknown option: $1"
+	--*) echo 1>&2 "Unknown option: $1"
 		;;
 #	*) echo "Argument: $1"
 #		;;
@@ -90,7 +90,6 @@ fi
 
 echo Starting backup of "$dir" to "$backup_path" ...
 
-# test if this works
 tar -c -g "$backup_log" -f - "$dir" \
 $([ "$compress_backup" = true ] && echo "| $BACKUP_COMPRESSOR" || echo "") \
 $([ "$encrypt_backup" = true ] && echo "| $BACKUP_ENCRYPTOR $backup_public_key" || echo "") \
@@ -102,3 +101,5 @@ if [ "$full_backup" = false ]
 then
 	rm "$backup_log"
 fi
+
+exit 0
