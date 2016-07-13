@@ -1,18 +1,54 @@
 #!/bin/bash
 
+
+# Copyright 2016 Erik Fritzsche
+#
+#
+# Backup your directories by firstly packing them followed by an
+# optional compression and/or by a strong AES128/AES256 encryption.
+# The encryption uses RSA asymetric encryption for the random AES
+# key, so you can store your RSA public key for backups on the
+# machine but have the key to decrypt somewhere secure.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+# TODO
+# make help option + page
+# may create man page
+# backup name controllable by user
+# toggle AES128/AES256
+
+
+# constants
 readonly BACKUP_COMPRESSOR="lbzip2"
 readonly BACKUP_ENCRYPTOR="java -jar cryptout.jar --encrypt --aes256"
 
 
+# extract path to backup und backup directory argument
 dir="${*: -2:1}"
 backup_dir="${*: -1:1}"
 
 
+# options
 full_backup=false
 compress_backup=false
 encrypt_backup=false
 backup_public_key=""
 
+
+# extract options and arguments
 while [ $# -gt 2 ]
 do
 	case "$1" in
@@ -39,14 +75,19 @@ do
 done
 
 
+# setup backup name and extension
 backup_name="$(date +'%Y-%m-%d-%H-%M')"
 backup_extension=$([ "$full_backup" = true ] && echo ".full.backup" || echo ".backup")
 
+
+# normalize backup directory format
 if [[ "$backup_dir" != *"/" ]]
 then
 	backup_dir="$backup_dir/"
 fi
 
+
+# search unused backup path
 backup_path="$backup_dir$backup_name"
 
 if [[ -f "$backup_path$backup_extension" ]] || [[ -f "$backup_path-0$backup_extension" ]]
@@ -68,10 +109,12 @@ fi
 backup_path="$backup_path$backup_extension"
 
 
+# setup backup location
 mkdir -p "$backup_dir"
 touch "$backup_path"
 
 
+# set log file location based on backup mode (full backup or incremental on last full backup)
 backup_log="${backup_dir}backup.log"
 if [ "$full_backup" = true ]
 then
@@ -88,18 +131,23 @@ else
 fi
 
 
-echo Starting backup of "$dir" to "$backup_path" ...
+# split command into parts
+pack_cmd="tar -c -g $backup_log -f - $dir"
+compress_cmd=$([ "$compress_backup" = true ] && echo "| $BACKUP_COMPRESSOR" || echo "")
+encrypt_cmd=$([ "$encrypt_backup" = true ] && echo "| $BACKUP_ENCRYPTOR $backup_public_key" || echo "")
 
-tar -c -g "$backup_log" -f - "$dir" \
-$([ "$compress_backup" = true ] && echo "| $BACKUP_COMPRESSOR" || echo "") \
-$([ "$encrypt_backup" = true ] && echo "| $BACKUP_ENCRYPTOR $backup_public_key" || echo "") \
-> "$backup_path"
 
-echo Finished backup of "$dir"
+# execute backup command parts
+eval $pack_cmd $compress_cmd $encrypt_cmd > "$backup_path"
 
+
+# delete tmp log files
 if [ "$full_backup" = false ]
 then
 	rm "$backup_log"
 fi
 
+
+# exit script
+echo Finished backup of "$dir"
 exit 0
